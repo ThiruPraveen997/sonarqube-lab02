@@ -9,7 +9,9 @@ public class App {
     public static void main(String[] args) throws Exception {
 
         Calculator calc = new Calculator();
-        LOGGER.info("Result: " + calc.add(10, 5));
+        if (LOGGER.isLoggable(java.util.logging.Level.INFO)) {
+            LOGGER.info("Result: " + calc.add(10, 5));
+        }
 
         UserService service = new UserService();
         service.findUser("admin");
