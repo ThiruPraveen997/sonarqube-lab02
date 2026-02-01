@@ -7,26 +7,35 @@ import java.sql.SQLException;
 
 public class UserService {
 
-    private static final String DB_URL;
-    private static final String DB_USER;
-    private static final String DB_PASSWORD;
+    private final String dbUrl;
+    private final String dbUser;
+    private final String dbPassword;
 
-    static { // NOSONAR
-        DB_URL = System.getenv("DB_URL");
-        DB_USER = System.getenv("DB_USER");
-        DB_PASSWORD = System.getenv("DB_PASSWORD");
-
-        if (DB_URL == null || DB_USER == null || DB_PASSWORD == null) {
-            throw new IllegalStateException(
-                "Database environment variables (DB_URL, DB_USER, DB_PASSWORD) must be set");
+    // Constructor injection (easy to unit test)
+    public UserService(String dbUrl, String dbUser, String dbPassword) {
+        if (dbUrl == null || dbUser == null || dbPassword == null) {
+            throw new IllegalArgumentException(
+                "Database configuration must not be null");
         }
+        this.dbUrl = dbUrl;
+        this.dbUser = dbUser;
+        this.dbPassword = dbPassword;
+    }
+
+    // Default constructor for production
+    public UserService() {
+        this(
+            System.getenv("DB_URL"),
+            System.getenv("DB_USER"),
+            System.getenv("DB_PASSWORD")
+        );
     }
 
     public void findUser(String username) throws SQLException {
 
         String query = "SELECT id, name FROM users WHERE name = ?";
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
              PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setString(1, username);
@@ -38,7 +47,7 @@ public class UserService {
 
         String query = "DELETE FROM users WHERE name = ?";
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
              PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setString(1, username);
